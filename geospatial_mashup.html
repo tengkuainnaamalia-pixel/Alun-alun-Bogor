@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Geospatial Mashup - Alun-Alun Kota Bogor</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+
+    .coord-box {
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      background: white;
+      padding: 7px 10px;
+      font-size: 13px;
+      z-index: 1000;
+      border-radius: 4px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.35);
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <div class="coord-box" id="coords">
+    Klik peta untuk melihat koordinat
+  </div>
+
+  <script>
+    // =====================================================
+    // 1. Inisialisasi peta
+    // Titik tengah Alun-Alun Kota Bogor
+    // =====================================================
+    var map = L.map('map').setView([-6.59486, 106.79143], 18);
+
+    // =====================================================
+    // 2. Basemap OpenStreetMap
+    // =====================================================
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 21,
+      maxNativeZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Tambahkan skala
+    L.control.scale({
+      metric: true,
+      imperial: false
+    }).addTo(map);
+
+    // =====================================================
+    // 3. Marker pusat Alun-Alun Kota Bogor
+    // =====================================================
+    L.marker([-6.593338180514852, 106.79164105762504])
+      .addTo(map)
+      .bindPopup('<b>Masjid Agung Bogor</b><br>area alun-alun.');
+
+    // =====================================================
+    // =====================================================
+// Circle radius 500 meter dari pusat Alun-Alun Kota Bogor
+// =====================================================
+var pusatAlunAlun = [-6.59486, 106.79143];
+
+var circle500m = L.circle(pusatAlunAlun, {
+  color: '#FF1493',
+  fillColor: '#FFC0CB',
+  fillOpacity: 0.25,
+  radius: 500
+}).addTo(map)
+  .bindPopup('<b>Radius 500 meter</b><br>Area jangkauan 500 meter dari pusat Alun-Alun Kota Bogor.');
+
+// Supaya seluruh circle radius 500 meter terlihat di layar
+map.fitBounds(circle500m.getBounds(), {
+  padding: [30, 30]
+});
+    // 4. Polygon area Alun-Alun Kota Bogor
+    // Bentuk dibuat memanjang utara-selatan mengikuti batas taman.
+    // Sisi barat dekat Jl. Nyi Raja Permas / Stasiun Bogor.
+    // Sisi timur dekat Jl. Dewi Sartika.
+    // =====================================================
+    var polygonAlunAlun = [
+      [-6.5930095697226205, 106.79143748928914],  // sudut barat laut
+      [-6.595954200680409, 106.7908331941193],  // sudut timur laut
+      [-6.596124811025758, 106.79155198791833],  // sudut tenggara
+      [-6.593230746078738, 106.79218172762205],  // sudut barat daya
+    ];
+
+    var alunAlunLayer = L.polygon(polygonAlunAlun, {
+      color: '#006400',
+      weight: 3,
+      fillColor: '#00FF7F',
+      fillOpacity: 0.45
+    }).addTo(map)
+      .bindPopup('<b>Polygon Alun-Alun Kota Bogor</b><br>Area utama alun-alun.');
+
+    // Supaya peta langsung fokus ke polygon
+    map.fitBounds(alunAlunLayer.getBounds(), {
+      padding: [35, 35]
+    });
+
+    // =====================================================
+    // =====================================================
+    // 6. Polyline jalur pedestrian di dalam Alun-Alun
+    // Garis dibuat mengikuti arah memanjang alun-alun
+    // =====================================================
+    // Polyline sepanjang Jalan Dewi Sartika
+// =====================================================
+// Polyline mengikuti bentuk Jalan Dewi Sartika
+// Sisi timur Alun-Alun Kota Bogor
+// =====================================================
+// =====================================================
+// Polyline mengikuti Jalan Kapten Muslihat
+// Sisi selatan Alun-Alun Kota Bogor
+// =====================================================
+var jalanKaptenMuslihat = [
+  [-6.595839668860809, 106.78968105502989],
+  [-6.596298586381337, 106.79152895703305],
+  [-6.596626384350048, 106.793244866036],
+];
+
+L.polyline(jalanKaptenMuslihat, {
+  color: '#FF0000',
+  weight: 6,
+  opacity: 0.85,
+  lineCap: 'round',
+  lineJoin: 'round'
+}).addTo(map)
+  .bindPopup('<b>Jalan Kapten Muslihat</b><br>Jalan.');
+
+    // =====================================================
+    // 7. Ambil koordinat dengan klik peta
+    // Fitur ini berguna kalau ingin menggeser titik agar lebih presisi
+    // =====================================================
+    map.on('click', function(e) {
+      var lat = e.latlng.lat.toFixed(6);
+      var lng = e.latlng.lng.toFixed(6);
+
+      document.getElementById('coords').innerHTML =
+        'Koordinat: ' + lat + ', ' + lng;
+
+      L.popup()
+        .setLatLng(e.latlng)
+        .setContent(
+          '<b>Koordinat titik</b><br>' +
+          'Latitude: ' + lat + '<br>' +
+          'Longitude: ' + lng
+        )
+        .openOn(map);
+    });
+  </script>
+</body>
+</html>
